@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Documentação interativa da API REST de Livros — CRUD, JWT, paginação e busca. Node.js puro, zero dependências." />
+  <title>API de Livros · Documentação</title>
+  <style>
+    :root {
+      --fundo: #0f0c1d;
+      --cartao: #181430;
+      --borda: #2d2650;
+      --texto: #ece9f6;
+      --suave: #a29cc8;
+      --roxo: #8b5cf6;
+      --roxo-claro: #c4b5fd;
+      --get: #10b981;
+      --post: #3b82f6;
+      --put: #f59e0b;
+      --delete: #ef4444;
+      --verde: #10b981;
+      --vermelho: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--fundo);
+      color: var(--texto);
+      line-height: 1.65;
+    }
+    a { color: var(--roxo-claro); }
+    code, pre { font-family: "Cascadia Code", Consolas, monospace; }
+
+    /* ---------- hero ---------- */
+    .hero {
+      padding: 48px 24px 40px;
+      background: linear-gradient(180deg, #161130 0%, var(--fundo) 100%);
+      border-bottom: 1px solid var(--borda);
+      text-align: center;
+    }
+    .hero h1 { font-size: clamp(1.7rem, 4vw, 2.6rem); font-weight: 800; }
+    .hero h1 span { color: var(--roxo-claro); }
+    .hero p { color: var(--suave); max-width: 620px; margin: 10px auto 0; }
+    .selos { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px; }
+    .selo {
+      font-size: .75rem; font-weight: 700; letter-spacing: .02em;
+      padding: 5px 12px; border-radius: 999px;
+      border: 1px solid var(--borda); background: rgba(139,92,246,.12); color: var(--roxo-claro);
+    }
+    .base {
+      display: inline-block; margin-top: 16px; padding: 8px 16px;
+      border-radius: 12px; background: var(--cartao); border: 1px solid var(--borda);
+      font-size: .85rem; color: var(--suave);
+    }
+    .base b { color: var(--texto); font-weight: 600; }
+
+    /* ---------- layout ---------- */
+    main { max-width: 960px; margin: 0 auto; padding: 32px 20px 64px; }
+    section { margin-bottom: 42px; }
+    h2 { font-size: 1.25rem; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+    h2::before { content: ""; width: 4px; height: 22px; border-radius: 4px; background: var(--roxo); }
+
+    /* ---------- cartões ---------- */
+    .cartao {
+      background: var(--cartao); border: 1px solid var(--borda);
+      border-radius: 16px; padding: 20px 22px;
+    }
+
+    /* ---------- chips de método ---------- */
+    .chip {
+      display: inline-block; font-size: .7rem; font-weight: 800; letter-spacing: .05em;
+      padding: 3px 10px; border-radius: 8px; color: #fff;
+    }
+    .chip.get { background: var(--get); }
+    .chip.post { background: var(--post); }
+    .chip.put { background: var(--put); color: #201500; }
+    .chip.delete { background: var(--delete); }
+    .chip.ok { background: var(--verde); }
+    .chip.erro { background: var(--vermelho); }
+    .chip.cadeado { background: rgba(139,92,246,.18); color: var(--roxo-claro); border: 1px solid var(--borda); }
+
+    /* ---------- auth ---------- */
+    .auth-grade { display: grid; gap: 18px; grid-template-columns: 1fr 1fr; }
+    @media (max-width: 760px) { .auth-grade { grid-template-columns: 1fr; } }
+    label { display: block; font-size: .8rem; font-weight: 700; color: var(--suave); margin: 10px 0 4px; }
+    input, textarea, select {
+      width: 100%; padding: 10px 12px; border-radius: 10px;
+      border: 1px solid var(--borda); background: #100d24; color: var(--texto);
+      font-size: .9rem; outline: none;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--roxo); box-shadow: 0 0 0 3px rgba(139,92,246,.2); }
+    button {
+      cursor: pointer; border: none; border-radius: 10px;
+      font-weight: 700; font-size: .88rem;
+      padding: 10px 18px; background: var(--roxo); color: #fff;
+      transition: filter .15s;
+    }
+    button:hover { filter: brightness(1.15); }
+    .dica { font-size: .8rem; color: var(--suave); margin-top: 10px; }
+    .dica code { background: #100d24; padding: 2px 7px; border-radius: 6px; color: var(--roxo-claro); }
+
+    /* ---------- endpoints ---------- */
+    .endpoint { margin-bottom: 14px; }
+    .endpoint summary {
+      list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .endpoint summary::-webkit-details-marker { display: none; }
+    .endpoint .caminho { font-weight: 700; font-size: .95rem; }
+    .endpoint .resumo { color: var(--suave); font-size: .85rem; }
+    .endpoint[open] summary { margin-bottom: 10px; }
+    .corpo-endpoint { border-top: 1px dashed var(--borda); padding-top: 12px; }
+    .params { font-size: .82rem; color: var(--suave); margin: 8px 0; }
+    .params b { color: var(--roxo-claro); }
+    pre {
+      background: #100d24; border: 1px solid var(--borda); border-radius: 10px;
+      padding: 12px 14px; font-size: .8rem; overflow-x: auto; margin: 8px 0;
+      color: #d8d4f2; white-space: pre;
+    }
+    .rotulo-pre { font-size: .7rem; font-weight: 800; letter-spacing: .08em; color: var(--suave); text-transform: uppercase; margin-top: 10px; }
+
+    /* ---------- testador ---------- */
+    .testador-grade { display: grid; grid-template-columns: 340px 1fr; gap: 18px; }
+    @media (max-width: 820px) { .testador-grade { grid-template-columns: 1fr; } }
+    .linha-form { display: flex; gap: 8px; margin-bottom: 8px; }
+    .atalhos { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .atalhos button { font-size: .72rem; padding: 6px 10px; background: #221c44; color: var(--roxo-claro); border: 1px solid var(--borda); }
+    .saida {
+      min-height: 220px; max-height: 420px; overflow: auto;
+      background: #100d24; border: 1px solid var(--borda); border-radius: 10px;
+      padding: 12px 14px; font-size: .8rem; white-space: pre; color: #d8d4f2;
+    }
+
+    footer { text-align: center; color: var(--suave); font-size: .8rem; padding: 24px; border-top: 1px solid var(--borda); }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <h1>📚 API de <span>Livros</span></h1>
+    <p>
+      API REST completa: CRUD, autenticação por token JWT, paginação, busca e
+      validação detalhada. Feita em <b>Node.js puro — zero dependências</b>.
+    </p>
+    <div class="selos">
+      <span class="selo">Node ≥ 18</span>
+      <span class="selo">0 dependências</span>
+      <span class="selo">JWT · HMAC-SHA256</span>
+      <span class="selo">Testes automatizados</span>
+    </div>
+    <div class="base">URL base: <b>http://localhost:3000</b></div>
+  </header>
+
+  <main>
+
+    <!-- ============ AUTENTICAÇÃO ============ -->
+    <section id="autenticacao">
+      <h2>Autenticação</h2>
+      <div class="cartao auth-grade">
+        <div>
+          <p><b>1.</b> Troque suas credenciais por um token:</p>
+          <label>Usuário</label>
+          <input id="login-usuario" value="admin" />
+          <label>Senha</label>
+          <input id="login-senha" type="password" value="admin123" />
+          <div style="margin-top:12px"><button onclick="fazerLogin()">Obter token (POST /login)</button></div>
+          <p id="login-resultado" class="dica"></p>
+        </div>
+        <div>
+          <p><b>2.</b> Envie o token em todas as rotas protegidas:</p>
+          <pre>Authorization: Bearer &lt;token&gt;</pre>
+          <label>Token atual (usado pelo testador)</label>
+          <input id="token-caixa" placeholder="faça login acima…" />
+          <p id="token-status" class="dica">sem token — as rotas 🔒 devolvem 401</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ENDPOINTS ============ -->
+    <section id="endpoints">
+      <h2>Endpoints</h2>
+
+      <details class="cartao endpoint" open>
+        <summary><span class="chip get">GET</span><span class="caminho">/health</span><span class="resumo">— status do serviço</span></summary>
+        <div class="corpo-endpoint">
+          <p class="resumo">Público. Informa uptime e quantidade de livros cadastrados.</p>
+          <div class="rotulo-pre">resposta</div>
+          <pre>{ "status": "ok", "uptime": 42, "livrosCadastrados": 4 }</pre>
+        </div>
+      </details>
+
+      <details class="cartao endpoint">
+        <summary><span class="chip post">POST</span><span class="caminho">/login</span><span class="resumo">— credenciais → token</span></summary>
+        <div class="corpo-endpoint">
+          <p class="resumo">Público. Usuário demo: <b>admin / admin123</b>. Token expira em 1 hora.</p>
+          <div class="rotulo-pre">corpo</div>
+          <pre>{ "usuario": "admin", "senha": "admin123" }</pre>
+          <div class="rotulo-pre">resposta</div>
+          <pre>{ "token": "eyJhbGciOi…", "expiraEm": "60 min" }</pre>
+        </div>
+      </details>
+
+      <details class="cartao endpoint">
+        <summary><span class="chip get">GET</span><span class="caminho">/livros</span><span class="resumo">— lista, pagina e busca</span></summary>
+        <div class="corpo-endpoint">
+          <p class="resumo">Público. Paginação <b>?page</b> (≥1) e <b>?limite</b> (1–50); filtro <b>?busca</b> (título/autor) e <b>?genero</b> (exato).</p>
+          <div class="rotulo-pre">exemplo</div>
+          <pre>GET /livros?busca=machado&limite=5&page=1</pre>
+          <div class="rotulo-pre">resposta</div>
+          <pre>{
+  "pagina": 1, "limite": 5, "total": 1, "totalPaginas": 1,
+  "itens": [ { "id": "…", "titulo": "Dom Casmurro", "autor": "Machado de Assis", "ano": 1899, "genero": "Literatura" } ]
+}</pre>
+        </div>
+      </details>
+
+      <details class="cartao endpoint">
+        <summary><span class="chip get">GET</span><span class="caminho">/livros/:id</span><span class="resumo">— detalhe</span></summary>
+        <div class="corpo-endpoint">
+          <p class="resumo">Público. <b>200</b> com o livro ou <b>404</b> se o id não existir.</p>
+        </div>
+      </details>
+
+      <details class="cartao endpoint">
+        <summary><span class="chip post">POST</span><span class="caminho">/livros</span><span class="chip cadeado">🔒 token</span><span class="resumo">— cria livro</span></summary>
+        <div class="corpo-endpoint">
+          <p class="resumo">Validação: <b>titulo</b>, <b>autor</b> e <b>genero</b> (≥2 caracteres) e <b>ano</b> (1450 – ano atual+1). Falha → <b>422</b> com erros campo a campo.</p>
+          <div class="rotulo-pre">corpo</div>
+          <pre>{ "titulo": "O Cortiço", "autor": "Aluísio Azevedo", "ano": 1890, "genero": "Literatura" }</pre>
+          <div class="rotulo-pre">resposta 201</div>
+          <pre>{ "id": "…", "titulo": "O Cortiço", "autor": "Aluísio Azevedo", "ano": 1890, "genero": "Literatura", "criadoPor": "admin" }</pre>
+        </div>
+      </details>
+
+      <details class="cartao endpoint">
+        <summary><span class="chip put">PUT</span><span class="caminho">/livros/:id</span><span class="chip cadeado">🔒 token</span><span class="resumo">— atualização parcial</span></summary>
+        <div class="corpo-endpoint">
+          <p class="resumo">Envie apenas os campos que quer mudar — o restante é preservado.</p>
+          <div class="rotulo-pre">corpo</div>
+          <pre>{ "ano": 1891 }</pre>
+        </div>
+      </details>
+
+      <details class="cartao endpoint">
+        <summary><span class="chip delete">DELETE</span><span class="caminho">/livros/:id</span><span class="chip cadeado">🔒 token</span><span class="resumo">— remove</span></summary>
+        <div class="corpo-endpoint">
+          <p class="resumo"><b>200</b> com o título removido, ou <b>404</b>.</p>
+          <div class="rotulo-pre">resposta</div>
+          <pre>{ "removido": "O Cortiço", "id": "…" }</pre>
+        </div>
+      </details>
+    </section>
+
+    <!-- ============ TESTADOR ============ -->
+    <section id="testador">
+      <h2>Testador interativo</h2>
+      <div class="cartao testador-grade">
+        <div>
+          <div class="linha-form">
+            <select id="t-metodo" style="width:110px">
+              <option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option>
+            </select>
+            <input id="t-caminho" value="/health" />
+          </div>
+          <textarea id="t-corpo" rows="7" placeholder='corpo JSON (só para POST/PUT)'></textarea>
+          <div style="margin-top:10px"><button onclick="enviar()">Enviar requisição ▶</button></div>
+          <div class="atalhos">
+            <button onclick="preencher('health')">health</button>
+            <button onclick="preencher('login')">login</button>
+            <button onclick="preencher('listar')">listar</button>
+            <button onclick="preencher('detalhe')">detalhe</button>
+            <button onclick="preencher('criar')">criar</button>
+            <button onclick="preencher('atualizar')">atualizar</button>
+            <button onclick="preencher('remover')">remover</button>
+          </div>
+          <p class="dica">O token da caixa acima é enviado automaticamente no cabeçalho <code>Authorization</code>.</p>
+        </div>
+        <div>
+          <p style="margin-bottom:8px">Resposta: <span id="t-status"></span></p>
+          <div id="t-resposta" class="saida">dispare uma requisição para ver a resposta aqui…</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    API de Livros · projeto de portfólio · Node.js puro, zero dependências ·
+    <a href="https://github.com/wenderson-hgs" target="_blank" rel="noopener">github.com/wenderson-hgs</a>
+  </footer>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    let token = "";
+
+    async function fazerLogin() {
+      const saida = $("#login-resultado");
+      saida.textContent = "Entrando…";
+      try {
+        const res = await fetch("/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario: $("#login-usuario").value.trim(), senha: $("#login-senha").value }),
+        });
+        const dados = await res.json();
+        if (res.ok) {
+          token = dados.token;
+          $("#token-caixa").value = token;
+          $("#token-status").textContent = "✓ token ativo (expira em 60 min)";
+          saida.textContent = "Login efetuado — token guardado e pronto para o testador.";
+        } else {
+          saida.textContent = "Erro " + res.status + ": " + (dados.erro || "credenciais inválidas");
+        }
+      } catch (e) {
+        saida.textContent = "Falha de rede: " + e.message;
+      }
+    }
+
+    async function enviar() {
+      const metodo = $("#t-metodo").value;
+      const caminho = $("#t-caminho").value.trim() || "/";
+      const corpoTexto = $("#t-corpo").value.trim();
+      const t = $("#token-caixa").value.trim();
+      if (t) token = t;
+
+      const cab = { "Content-Type": "application/json" };
+      if (token) cab.Authorization = "Bearer " + token;
+
+      const comCorpo = (metodo === "POST" || metodo === "PUT") && corpoTexto;
+      const saida = $("#t-resposta");
+      saida.textContent = "Enviando…";
+      try {
+        const res = await fetch(caminho, { method: metodo, headers: cab, body: comCorpo ? corpoTexto : undefined });
+        const texto = await res.text();
+        let bonito = texto;
+        try { bonito = JSON.stringify(JSON.parse(texto), null, 2); } catch { /* não é JSON */ }
+        $("#t-status").innerHTML =
+          '<span class="chip ' + (res.ok ? "ok" : "erro") + '">HTTP ' + res.status + "</span>";
+        saida.textContent = bonito || "(sem corpo)";
+      } catch (e) {
+        $("#t-status").innerHTML = '<span class="chip erro">falha</span>';
+        saida.textContent = e.message;
+      }
+    }
+
+    const PRE = {
+      health: ["GET", "/health", ""],
+      login: ["POST", "/login", '{\n  "usuario": "admin",\n  "senha": "admin123"\n}'],
+      listar: ["GET", "/livros?busca=&page=1&limite=10", ""],
+      detalhe: ["GET", "/livros/cole-aqui-um-id", ""],
+      criar: ["POST", "/livros", '{\n  "titulo": "O Cortiço",\n  "autor": "Aluísio Azevedo",\n  "ano": 1890,\n  "genero": "Literatura"\n}'],
+      atualizar: ["PUT", "/livros/cole-aqui-um-id", '{\n  "ano": 1891\n}'],
+      remover: ["DELETE", "/livros/cole-aqui-um-id", ""],
+    };
+    function preencher(qual) {
+      const [m, c, b] = PRE[qual];
+      $("#t-metodo").value = m;
+      $("#t-caminho").value = c;
+      $("#t-corpo").value = b;
+    }
+  </script>
+</body>
+</html>

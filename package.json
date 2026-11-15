@@ -1,0 +1,16 @@
+{
+  "name": "api-livros",
+  "version": "1.0.0",
+  "description": "API REST completa de livros — CRUD, autenticação JWT, paginação, busca e documentação interativa. Zero dependências (Node.js puro).",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node scripts/test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "author": "wenderson-hgs",
+  "license": "MIT"
+}
